@@ -19,14 +19,14 @@ namespace D2Api
             Console.WriteLine($"{reeds.displayProperties.name} - {reeds.flavorText}");
             Console.WriteLine("--- END GetItemById\n");
 
-            var memberships = API.GetLinkedProfiles(4611686018471516071, BungieMembershipType.Steam, true);
+            var memberships = API.GetLinkedProfiles(4611686018434588958, BungieMembershipType.All, true);
             Console.WriteLine("--- START GetLinkedProfiles");
             var platforms = string.Join(", ", memberships.Response.profiles[0].applicableMembershipTypes);
             Console.WriteLine(
                 $"{memberships.Response.bnetMembership.supplementalDisplayName} (Linked platforms: {platforms})");
             Console.WriteLine("--- END GetLinkedProfiles\n");
 
-            var profile = API.GetProfile(4611686018471516071, BungieMembershipType.Steam, new[]
+            var profile = API.GetProfile(4611686018434588958, memberships.Response.profiles[0].membershipType, new[]
             {
                 Components.QueryComponents.Profiles
             });

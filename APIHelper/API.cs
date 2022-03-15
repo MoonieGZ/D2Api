@@ -61,7 +61,7 @@ namespace APIHelper
             }
 
             Console.WriteLine("[Manifest] Downloading...");
-            new WebClient().DownloadFile("https://bungie.net" + path, manifestFilePath);
+            new WebClient().DownloadFile(RemoteAPI.apiBaseUrl + path, manifestFilePath);
 
             Console.WriteLine("[Manifest] Unpacking...");
             ZipFile.ExtractToDirectory(manifestFilePath, "Data/Manifest");
@@ -87,6 +87,18 @@ namespace APIHelper
                       $"LinkedProfiles/?getAllMemberships={getAllMemberships.ToString().ToLower()}";
 
             return JsonConvert.DeserializeObject<LinkedProfiles.Root>(RemoteAPI.Query(url));
+        }
+
+        public static DestinyProfile.Root GetProfile(long membershipId, BungieMembershipType membershipType,
+            Components.QueryComponents[] components)
+        {
+            var comps = components.Select(component => $"{(int) component}").ToList();
+
+            var url = $"/Platform/Destiny2/{(int)membershipType}/" +
+                      $"Profile/{membershipId}/" +
+                      $"?components={string.Join(",", comps)}";
+
+            return JsonConvert.DeserializeObject<DestinyProfile.Root>(RemoteAPI.Query(url));
         }
     }
 }

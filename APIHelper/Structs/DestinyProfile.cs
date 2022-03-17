@@ -632,7 +632,7 @@ namespace APIHelper.Structs
         [J("energyUnused")] public long EnergyUnused { get; set; }
     }
 
-    public class Stat
+    public abstract partial class Stat
     {
         [J("statHash")] public long StatHash { get; set; }
         [J("value")] public long Value { get; set; }
@@ -686,7 +686,7 @@ namespace APIHelper.Structs
         [J("artRegions")] public Dictionary<string, long> ArtRegions { get; set; }
     }
 
-    public class Sockets
+    public partial class Sockets
     {
         [J("data")] public Dictionary<string, SocketsDatum> Data { get; set; }
         [J("privacy")] public Components.ComponentPrivacySetting Privacy { get; set; }
@@ -709,7 +709,7 @@ namespace APIHelper.Structs
         public long[] EnableFailIndexes { get; set; }
     }
 
-    public class Stats
+    public partial class Stats
     {
         [J("data")] public Dictionary<string, StatsDatum> Data { get; set; }
         [J("privacy")] public Components.ComponentPrivacySetting Privacy { get; set; }

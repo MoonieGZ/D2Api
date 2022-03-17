@@ -142,7 +142,7 @@ namespace APIHelper.Structs
 
     public class Collectible
     {
-        [J("state")] public long State { get; set; }
+        [J("state")] public Components.State State { get; set; }
     }
 
     public class CharacterCraftables
@@ -918,29 +918,5 @@ namespace APIHelper.Structs
         {
             return JsonConvert.DeserializeObject<DestinyProfile>(json, Converter.Settings);
         }
-    }
-
-    // you never know
-    // ReSharper disable UnusedMember.Global
-    public static class Serialize
-    {
-        public static string ToJson(this DestinyProfile self)
-        {
-            return JsonConvert.SerializeObject(self, Converter.Settings);
-        }
-    }
-    // ReSharper restore UnusedMember.Global
-
-    internal static class Converter
-    {
-        public static readonly JsonSerializerSettings Settings = new JsonSerializerSettings
-        {
-            MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
-            DateParseHandling = DateParseHandling.None,
-            Converters =
-            {
-                new IsoDateTimeConverter {DateTimeStyles = DateTimeStyles.AssumeUniversal}
-            }
-        };
     }
 }

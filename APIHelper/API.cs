@@ -89,7 +89,7 @@ namespace APIHelper
             return JsonConvert.DeserializeObject<LinkedProfiles.Root>(RemoteAPI.Query(url));
         }
 
-        public static DestinyProfile.Root GetProfile(long membershipId, BungieMembershipType membershipType,
+        public static DestinyProfile GetProfile(long membershipId, BungieMembershipType membershipType,
             Components.QueryComponents[] components)
         {
             var comps = components.Select(component => $"{(int) component}").ToList();
@@ -98,7 +98,7 @@ namespace APIHelper
                       $"Profile/{membershipId}/" +
                       $"?components={string.Join(",", comps)}";
 
-            return JsonConvert.DeserializeObject<DestinyProfile.Root>(RemoteAPI.Query(url));
+            return DestinyProfile.FromJson(RemoteAPI.Query(url));
         }
     }
 }

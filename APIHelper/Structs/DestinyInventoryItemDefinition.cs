@@ -10,6 +10,7 @@ namespace APIHelper.Structs
     {
         [J("displayProperties")] public DisplayProperties DisplayProperties { get; set; }
         [J("tooltipNotifications")] public object[] TooltipNotifications { get; set; }
+        [J("collectibleHash")] public long CollectibleHash { get; set; }
         [J("iconWatermark")] public string IconWatermark { get; set; }
         [J("iconWatermarkShelved")] public string IconWatermarkShelved { get; set; }
         [J("backgroundColor")] public BackgroundColor BackgroundColor { get; set; }

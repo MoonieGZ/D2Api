@@ -12,6 +12,9 @@ namespace APIHelper.Structs
         [J("tooltipNotifications")] public object[] TooltipNotifications { get; set; }
         [J("collectibleHash")] public long CollectibleHash { get; set; }
         [J("iconWatermark")] public string IconWatermark { get; set; }
+        [J("secondaryIcon")] public string SecondaryIcon { get; set; }
+        [J("secondaryOverlay")] public string SecondaryOverlay { get; set; }
+        [J("secondarySpecial")] public string SecondarySpecial { get; set; }
         [J("iconWatermarkShelved")] public string IconWatermarkShelved { get; set; }
         [J("backgroundColor")] public BackgroundColor BackgroundColor { get; set; }
         [J("screenshot")] public string Screenshot { get; set; }

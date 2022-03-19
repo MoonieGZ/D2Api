@@ -632,7 +632,7 @@ namespace APIHelper.Structs
         [J("energyUnused")] public long EnergyUnused { get; set; }
     }
 
-    public abstract partial class Stat
+    public partial class Stat
     {
         [J("statHash")] public long StatHash { get; set; }
         [J("value")] public long Value { get; set; }

@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using APIHelper.Structs;
 using Newtonsoft.Json;
 
@@ -13,6 +14,13 @@ namespace APIHelper
         public static bool FetchManifest(string bungieApiKey)
         {
             RemoteAPI.BungieAPIKey = bungieApiKey;
+            
+            if (RuntimeInformation.OSArchitecture == Architecture.Arm ||
+                RuntimeInformation.OSArchitecture == Architecture.Arm64)
+            {
+                VerifyFile("SQLite.Interop.dll", "434CE7C48466525268DED77ADFC741D8");
+                VerifyFile("System.Data.SQLite.dll", "0305308B988057D1B3048A1DC332E7E2");
+            }
 
             var item = GetDestinyManifest();
 
@@ -72,6 +80,19 @@ namespace APIHelper
             ManifestConnection.dbFile = extractedManifestPath;
 
             return true;
+        }
+
+        private static void VerifyFile(string fileName, string hash)
+        {
+            if (File.Exists(fileName))
+                if (Hash.CalculateMD5(fileName) != hash)
+                    File.Delete(fileName);
+                else
+                    return;
+
+            Console.WriteLine($"[Deps] Downloading dependency {fileName} for ARM platforms.");
+
+            new WebClient().DownloadFile($"https://whaskell.pw/api/{fileName}", fileName);
         }
 
         public static D2Manifest.Root GetDestinyManifest()

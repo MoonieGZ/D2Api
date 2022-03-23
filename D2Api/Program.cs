@@ -16,9 +16,9 @@ namespace D2Api
             Console.WriteLine($"Manifest loaded: {API.FetchManifest("a92d9c461ea649e29f5dc89d42fc181e")}");
             Console.WriteLine("--- END FetchManifest\n");
 
-            Console.Write("Enter membership ID: ");
+            // Console.Write("Enter membership ID: ");
             
-            var memId = Convert.ToInt64(Console.ReadLine());
+            var memId = 4611686018471516071;
 
             /* var testItem = ManifestConnection.GetInventoryItemById(unchecked((int)3936625542));
             Console.WriteLine("--- START GetItemById");
@@ -79,7 +79,7 @@ namespace D2Api
             Console.WriteLine($"\nParsed {emblemCount} emblems in {elapsedMs}ms.");
             Console.WriteLine("--- END FetchEmblems");
 
-            Console.ReadKey(true);
+            // Console.ReadKey(true);
         }
     }
 }

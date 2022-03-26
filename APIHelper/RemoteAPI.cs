@@ -2,7 +2,7 @@
 
 namespace APIHelper
 {
-    internal class RemoteAPI
+    public class RemoteAPI
     {
         public static string apiBaseUrl = "https://bungie.net";
         public static string BungieAPIKey { get; set; }

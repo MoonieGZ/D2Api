@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using APIHelper;
 using APIHelper.Structs;
+using Newtonsoft.Json;
 
 namespace D2Api
 {
@@ -18,7 +21,7 @@ namespace D2Api
 
             // Console.Write("Enter membership ID: ");
             
-            var memId = 4611686018471516071;
+            var memId = 4611686018472551978;
 
             /* var testItem = ManifestConnection.GetInventoryItemById(unchecked((int)3936625542));
             Console.WriteLine("--- START GetItemById");
@@ -40,6 +43,10 @@ namespace D2Api
             Console.WriteLine("--- START GetProfile");
             Console.WriteLine($"{profile.Response.Profile.Data.UserInfo.DisplayName}:\n\tPrivacy: {profile.Response.Profile.Privacy}\n\tCharacter IDs: {string.Join(", ", profile.Response.Profile.Data.CharacterIds)}");
             Console.WriteLine("--- END GetProfile\n");
+
+            Console.WriteLine("--- START GetBrightEngrams");
+            Console.WriteLine($"Character has: {GetBrightEngrams(memId, memberships.Response.profiles[0].membershipType)} bright engrams.");
+            Console.WriteLine("--- END GetBrightEngrams\n");
 
 
             Console.WriteLine("--- START FetchEmblems");
@@ -80,6 +87,22 @@ namespace D2Api
             Console.WriteLine("--- END FetchEmblems");
 
             // Console.ReadKey(true);
+        }
+        public static int GetBrightEngrams(long memId, BungieMembershipType memType)
+        {
+            // lazy method because characterInventories struct is broken
+            var url = $"/Platform/Destiny2/2/Profile/4611686018472551978/?components=201";
+            File.WriteAllText("tmp.json", RemoteAPI.Query(url));
+            dynamic resp = JsonConvert.DeserializeObject(RemoteAPI.Query(url));
+
+
+            var i = 0;
+            if (resp != null)
+                foreach (var responseItem in resp.Response.characterInventories.data["2305843009929385054"].items)
+                    if (responseItem.itemHash == 1968811824)
+                        i += 1;
+
+            return i;
         }
     }
 }

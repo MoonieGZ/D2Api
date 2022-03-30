@@ -2,7 +2,12 @@
 using System.Linq;
 using System.Text;
 using APIHelper.Structs;
+using BungieSharper.Entities.Destiny.Definitions;
+using BungieSharper.Entities.Destiny.Definitions.Collectibles;
+using BungieSharper.Entities.Destiny.Definitions.Presentation;
 using Dapper;
+using Newtonsoft.Json;
+// ReSharper disable UnusedMember.Global
 
 namespace APIHelper
 {
@@ -10,7 +15,7 @@ namespace APIHelper
     {
         public static string dbFile { get; set; }
 
-        private static SQLiteConnection ManifestDBConnection() => new SQLiteConnection("Data Source=" + dbFile);
+        private static SQLiteConnection ManifestDBConnection() => new("Data Source=" + dbFile);
 
         public static DestinyInventoryItemDefinition GetInventoryItemById(int id)
         {
@@ -18,7 +23,7 @@ namespace APIHelper
             cnn.Open();
             var result = cnn.Query<BaseManifestEntry>(
                 @"SELECT json FROM DestinyInventoryItemDefinition WHERE Id = @id", new { id }).FirstOrDefault();
-            return result != null ? DestinyInventoryItemDefinition.FromJson(Encoding.Default.GetString(result.json)) : new DestinyInventoryItemDefinition();
+            return result != null ? JsonConvert.DeserializeObject<DestinyInventoryItemDefinition>(Encoding.Default.GetString(result.json)) : new DestinyInventoryItemDefinition();
         }
 
         public static DestinyCollectibleDefinition GetItemCollectibleId(int id)
@@ -27,7 +32,7 @@ namespace APIHelper
             cnn.Open();
             var result = cnn.Query<BaseManifestEntry>(
                 @"SELECT json FROM DestinyCollectibleDefinition WHERE Id = @id", new { id }).FirstOrDefault();
-            return result != null ? DestinyCollectibleDefinition.FromJson(Encoding.Default.GetString(result.json)) : new DestinyCollectibleDefinition();
+            return result != null ? JsonConvert.DeserializeObject<DestinyCollectibleDefinition>(Encoding.Default.GetString(result.json)) : new DestinyCollectibleDefinition();
         }
 
         public static DestinyPresentationNodeDefinition GetPresentationNodeId(int id)
@@ -36,7 +41,7 @@ namespace APIHelper
             cnn.Open();
             var result = cnn.Query<BaseManifestEntry>(
                 @"SELECT json FROM DestinyPresentationNodeDefinition WHERE Id = @id", new { id }).FirstOrDefault();
-            return result != null ? DestinyPresentationNodeDefinition.FromJson(Encoding.Default.GetString(result.json)) : new DestinyPresentationNodeDefinition();
+            return result != null ? JsonConvert.DeserializeObject<DestinyPresentationNodeDefinition>(Encoding.Default.GetString(result.json)) : new DestinyPresentationNodeDefinition();
         }
     }
 }

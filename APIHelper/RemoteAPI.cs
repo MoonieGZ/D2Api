@@ -4,7 +4,7 @@ namespace APIHelper
 {
     public class RemoteAPI
     {
-        public static string apiBaseUrl = "https://bungie.net";
+        public const string apiBaseUrl = "https://bungie.net";
         public static string BungieAPIKey { get; set; }
 
         public static string Query(string url)

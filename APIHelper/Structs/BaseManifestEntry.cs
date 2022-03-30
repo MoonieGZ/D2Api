@@ -1,4 +1,5 @@
-﻿namespace APIHelper.Structs
+﻿// ReSharper disable UnusedMember.Global
+namespace APIHelper.Structs
 {
     internal class BaseManifestEntry
     {

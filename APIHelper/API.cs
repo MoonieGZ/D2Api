@@ -2,7 +2,7 @@
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Net;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using APIHelper.Structs;
 using Newtonsoft.Json;
@@ -11,12 +11,11 @@ namespace APIHelper
 {
     public class API
     {
-        public static bool FetchManifest(string bungieApiKey)
+        private static readonly HttpClient _httpClient = new();
+
+        public static bool FetchManifest()
         {
-            RemoteAPI.BungieAPIKey = bungieApiKey;
-            
-            if (RuntimeInformation.OSArchitecture == Architecture.Arm ||
-                RuntimeInformation.OSArchitecture == Architecture.Arm64)
+            if (RuntimeInformation.OSArchitecture is Architecture.Arm or Architecture.Arm64)
             {
                 VerifyFile("SQLite.Interop.dll", "434CE7C48466525268DED77ADFC741D8");
                 VerifyFile("System.Data.SQLite.dll", "0305308B988057D1B3048A1DC332E7E2");
@@ -36,9 +35,9 @@ namespace APIHelper
                 return false;
             }
 
-            Console.WriteLine($"[Manifest] Found v.{item.Response.version}");
+            Console.WriteLine($"[Manifest] Found v.{item.Response.Version}");
 
-            var path = item.Response.mobileWorldContentPaths.en;
+            var path = item.Response.MobileWorldContentPaths.En;
             var fileName = path.Split("/").LastOrDefault();
             var manifestFilePath = "Data/" + fileName;
             var extractedManifestPath = "Data/Manifest/" + fileName;
@@ -69,7 +68,8 @@ namespace APIHelper
             }
 
             Console.WriteLine("[Manifest] Downloading...");
-            new WebClient().DownloadFile(RemoteAPI.apiBaseUrl + path, manifestFilePath);
+            var fileBytes = _httpClient.GetByteArrayAsync(RemoteAPI.apiBaseUrl + path).Result;
+            File.WriteAllBytes(manifestFilePath, fileBytes);
 
             Console.WriteLine("[Manifest] Unpacking...");
             ZipFile.ExtractToDirectory(manifestFilePath, "Data/Manifest");
@@ -92,34 +92,16 @@ namespace APIHelper
 
             Console.WriteLine($"[Deps] Downloading dependency {fileName} for ARM platforms.");
 
-            new WebClient().DownloadFile($"https://whaskell.pw/api/{fileName}", fileName);
+            if (fileName == null)
+                return;
+
+            var fileBytes = _httpClient.GetByteArrayAsync($"https://whaskell.pw/api/{fileName}").Result;
+            File.WriteAllBytes(fileName, fileBytes);
         }
 
-        public static D2Manifest.Root GetDestinyManifest()
+        public static D2Manifest GetDestinyManifest()
         {
-            return JsonConvert.DeserializeObject<D2Manifest.Root>(RemoteAPI.Query("/Platform/Destiny2/Manifest/"));
-        }
-
-        public static LinkedProfiles.Root GetLinkedProfiles(long membershipId, BungieMembershipType membershipType,
-            bool getAllMemberships = false)
-        {
-            var url = $"/Platform/Destiny2/{(int) membershipType}/" +
-                      $"Profile/{membershipId}/" +
-                      $"LinkedProfiles/?getAllMemberships={getAllMemberships.ToString().ToLower()}";
-
-            return JsonConvert.DeserializeObject<LinkedProfiles.Root>(RemoteAPI.Query(url));
-        }
-
-        public static DestinyProfile GetProfile(long membershipId, BungieMembershipType membershipType,
-            Components.QueryComponents[] components)
-        {
-            var comps = components.Select(component => $"{(int) component}").ToList();
-
-            var url = $"/Platform/Destiny2/{(int)membershipType}/" +
-                      $"Profile/{membershipId}/" +
-                      $"?components={string.Join(",", comps)}";
-
-            return DestinyProfile.FromJson(RemoteAPI.Query(url));
+            return JsonConvert.DeserializeObject<D2Manifest>(RemoteAPI.Query("/Platform/Destiny2/Manifest/"));
         }
     }
 }

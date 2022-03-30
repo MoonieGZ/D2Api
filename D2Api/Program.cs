@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using APIHelper;
-using APIHelper.Structs;
+using BungieSharper.Client;
+using BungieSharper.Entities;
+using BungieSharper.Entities.Destiny;
 using Newtonsoft.Json;
 
 namespace D2Api
@@ -13,47 +14,64 @@ namespace D2Api
     {
         private static void Main()
         {
-            Console.Title = "Levante/Felicity API Testing";
+            Console.Title = "Felicity API Testing";
 
             Console.WriteLine("--- START FetchManifest");
-            Console.WriteLine($"Manifest loaded: {API.FetchManifest("a92d9c461ea649e29f5dc89d42fc181e")}");
+            Console.WriteLine($"Manifest loaded: {API.FetchManifest()}");
             Console.WriteLine("--- END FetchManifest\n");
 
             // Console.Write("Enter membership ID: ");
             
-            var memId = 4611686018472551978;
+            var memId = 4611686018471516071;
 
-            /* var testItem = ManifestConnection.GetInventoryItemById(unchecked((int)3936625542));
+            var testItem = ManifestConnection.GetInventoryItemById(unchecked((int)3936625542));
             Console.WriteLine("--- START GetItemById");
-            Console.WriteLine($"{testItem.DisplayProperties.Name} - {testItem.FlavorText}");
-            Console.WriteLine("--- END GetItemById\n");*/
+            Console.WriteLine($"{testItem.DisplayProperties.Name} - {testItem.DisplaySource}");
+            Console.WriteLine("--- END GetItemById\n");
 
-            var memberships = API.GetLinkedProfiles(memId, BungieMembershipType.All, true);
+            var bConfig = new BungieClientConfig
+            {
+                ApiKey = "secret",
+                OAuthClientId = 39573,
+                OAuthClientSecret = "secret",
+                UserAgent = "Felicity/v4.0 (+will09600@gmail.com)"
+            };
+            var bClient = new BungieApiClient(bConfig);
+
+            var memberships = bClient.Api.Destiny2_GetLinkedProfiles(memId, BungieMembershipType.All, true);
             Console.WriteLine("--- START GetLinkedProfiles");
-            var platforms = string.Join(", ", memberships.Response.profiles[0].applicableMembershipTypes);
-            Console.WriteLine(
-                $"{memberships.Response.bnetMembership.supplementalDisplayName} (Linked platforms: {platforms})");
+            var applicableMembershipTypes = memberships.Result.Profiles.FirstOrDefault()?.ApplicableMembershipTypes;
+            if (applicableMembershipTypes != null)
+            {
+                var platforms = string.Join(", ", applicableMembershipTypes);
+                Console.WriteLine(
+                    $"{memberships.Result.BnetMembership.SupplementalDisplayName} (Linked platforms: {platforms})");
+            }
+
             Console.WriteLine("--- END GetLinkedProfiles\n");
 
-            var profile = API.GetProfile(memId, memberships.Response.profiles[0].membershipType, new[]
-            {
-                Components.QueryComponents.Profiles,
-                Components.QueryComponents.Collectibles
-            });
+            var profile = bClient.Api.Destiny2_GetProfile(memId,
+                memberships.Result.Profiles.FirstOrDefault()!.MembershipType, new[]
+                {
+                    DestinyComponentType.Profiles, DestinyComponentType.Collectibles
+                });
+
             Console.WriteLine("--- START GetProfile");
-            Console.WriteLine($"{profile.Response.Profile.Data.UserInfo.DisplayName}:\n\tPrivacy: {profile.Response.Profile.Privacy}\n\tCharacter IDs: {string.Join(", ", profile.Response.Profile.Data.CharacterIds)}");
+            Console.WriteLine($"{profile.Result.Profile.Data.UserInfo.DisplayName}:\n\tPrivacy: {profile.Result.Profile.Privacy}\n\tCharacter IDs: {string.Join(", ", profile.Result.Profile.Data.CharacterIds)}");
             Console.WriteLine("--- END GetProfile\n");
 
-            Console.WriteLine("--- START GetBrightEngrams");
-            Console.WriteLine($"Character has: {GetBrightEngrams(memId, memberships.Response.profiles[0].membershipType)} bright engrams.");
-            Console.WriteLine("--- END GetBrightEngrams\n");
+            /*
+              Console.WriteLine("--- START GetBrightEngrams");
+              Console.WriteLine($"Character has: {GetBrightEngrams(memId, memberships.Result.Profiles.FirstOrDefault()!.MembershipType)} bright engrams.");
+              Console.WriteLine("--- END GetBrightEngrams\n");
+            */
 
 
             Console.WriteLine("--- START FetchEmblems");
             var watch = System.Diagnostics.Stopwatch.StartNew();
             var emblemCount = 0;
 
-            foreach (var (key, value) in profile.Response.ProfileCollectibles.Data.Collectibles)
+            foreach (var (key, value) in profile.Result.ProfileCollectibles.Data.Collectibles)
             {
                 var manifestCollectible = ManifestConnection.GetItemCollectibleId(unchecked((int)Convert.ToInt64(key)));
                 if(manifestCollectible.Redacted)
@@ -71,11 +89,15 @@ namespace D2Api
                     2220993106, // Trials
                     329982304 // Raids
                 };
+
                 foreach (var manifestCollectibleParentNodeHash in manifestCollectible.ParentNodeHashes)
                 {
-                    if (!emblemList.Contains(manifestCollectibleParentNodeHash)) continue;
+                    if (!emblemList.Contains(manifestCollectibleParentNodeHash))
+                        continue;
+
                     emblemCount++;
-                    if (value.State.HasFlag(Components.State.UniquenessViolation) && value.State.HasFlag(Components.State.NotAcquired))
+                    
+                    if (value.State.HasFlag(DestinyCollectibleState.UniquenessViolation) && value.State.HasFlag(DestinyCollectibleState.NotAcquired))
                     {
                         Console.WriteLine(manifestCollectible.DisplayProperties.Name + " is not legitimate.");
                     }
@@ -91,11 +113,10 @@ namespace D2Api
         public static int GetBrightEngrams(long memId, BungieMembershipType memType)
         {
             // lazy method because characterInventories struct is broken
-            var url = $"/Platform/Destiny2/2/Profile/4611686018472551978/?components=201";
+            var url = $"/Platform/Destiny2/{(int) memType}/Profile/{memId}/?components=201";
             File.WriteAllText("tmp.json", RemoteAPI.Query(url));
             dynamic resp = JsonConvert.DeserializeObject(RemoteAPI.Query(url));
-
-
+            
             var i = 0;
             if (resp != null)
                 foreach (var responseItem in resp.Response.characterInventories.data["2305843009929385054"].items)

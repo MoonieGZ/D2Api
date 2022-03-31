@@ -16,7 +16,7 @@ namespace APIHelper
 
         public static string CalculateBase64(string input)
         {
-            var plainTextBytes = Encoding.UTF8.GetBytes(plainText);
+            var plainTextBytes = Encoding.UTF8.GetBytes(input);
             return Convert.ToBase64String(plainTextBytes);
         }
     }

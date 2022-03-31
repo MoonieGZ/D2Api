@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using APIHelper.Structs;
+using BungieSharper.Client;
 using Newtonsoft.Json;
 
 namespace APIHelper
@@ -12,6 +13,7 @@ namespace APIHelper
     public class API
     {
         private static readonly HttpClient _httpClient = new();
+        public static BungieApiClient _apiClient;
 
         public static bool FetchManifest()
         {
@@ -102,6 +104,23 @@ namespace APIHelper
         public static D2Manifest GetDestinyManifest()
         {
             return JsonConvert.DeserializeObject<D2Manifest>(RemoteAPI.Query("/Platform/Destiny2/Manifest/"));
+        }
+
+        public static BungieApiClient GetApiClient(string apiKey, int clientId, string clientSecret)
+        {
+            if (_apiClient != null) return _apiClient;
+
+            var bConfig = new BungieClientConfig
+            {
+                ApiKey = apiKey,
+                OAuthClientId = (uint?) clientId,
+                OAuthClientSecret = clientSecret,
+                UserAgent = "Felicity/v4.0 (+will09600@gmail.com)"
+            };
+
+            _apiClient = new BungieApiClient(bConfig);
+
+            return _apiClient;
         }
     }
 }
